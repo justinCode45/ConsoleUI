@@ -10,76 +10,7 @@ using std::endl;
 using std::to_string;
 #define ESC '\x1b'
 
-// void printTriangleS(char a){
-//     int h=45;
-    
-//     SGR outColor[h][2*h-1]={SGR::white};
-//     char outChar[h][2*h-1]={' '};
-//     int index=0;
 
-//     for(int i=0;i<h;i++){
-//         for(int j=1;j<(h-i);j++){
-//             outChar[index/(2*h-1)][index%(2*h-1)]=' ';
-//             index++;
-//         }
-//         for(int j=0;j<(2*i+1);j++){
-//             outChar[index/(2*h-1)][index%(2*h-1)]=a;
-//             index++;
-//         }
-//         for(int j=1;j<(h-i);j++){
-//             outChar[index/(2*h-1)][index%(2*h-1)]=' ';
-//             index++;
-//         }
-//     }
-//     //Use chaos game to generate Sierpinski triangle
-//     int px=h/2;
-//     int py=(2*h-1)/2;
-//     for(int i=0;i<pow(h,2);i++){
-//         outColor[px][py]=SGR::red; 
-//         switch (rand()%3)
-//         {
-//         case 0:
-//             px=(px+0)/2;
-//             py=(py+(2*h-1)/2)/2;
-//             break;
-//         case 1:
-//             px=(px+h)/2;
-//             py=(py+0)/2;
-//             break;
-//         case 2:
-//             px=(px+h)/2;
-//             py=(py+(2*h-2))/2;
-//             break;
-//         }
-
-
-        
-
-//         for(int i=0;i<t.height;i++){
-//             for(int j=0;j<t.width;j++){
-//                 t.displayChar[i][j]=' ';
-//                 t.displayColor[i][j]=SGR::brightWhite;
-//             }
-//         }
-        
-//         for(int i=0;i<h;i++){
-//             for(int j=0;j<2*h-1;j++){
-//                 // cout<<j<<endl;
-//                 t.displayChar[i][j]= outChar[i][j];
-//             }
-            
-//         }
-//         for(int i=0;i<h;i++){
-//             for(int j=0;j<2*h-1;j++){
-//                 t.displayColor[i][j]= outColor[i][j];
-//             }
-            
-//         }
-        
-//         Sleep(2);
-//         t.display();
-//     }
-//}   
     
 enum class SGR:short{
     black=30,
@@ -199,7 +130,7 @@ void ConsoleUI::display(){
         // }
         LPDWORD temp;
 
-        if (!WriteConsole(hout,out,length,temp,NULL))cerr<<"fail fail fail"<<endl ;
+        if (!WriteConsole(hout,out,length,temp,NULL))cerr<<"fail fail fail"<<endl ; //bug
         cerr<<"temp:::::"<<*temp<<endl;
         // Sleep(1);
 }
