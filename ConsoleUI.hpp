@@ -3,15 +3,31 @@
 #include <windows.h>
 #include <sstream>
 #include <math.h>
-
+#include <variant>
+#include <tuple>
+#include <string>
+#include <fstream>
+#include <functional>
+using std::apply;
 using std::cerr;
-using std::endl;
-using std::to_string;
-using std::vector;
+using std::cin;
 using std::cout;
+using std::endl;
+using std::flush;
+using std::fstream;
+using std::function;
+using std::get;
+using std::string;
+using std::stringstream;
+using std::to_string;
+using std::tuple;
+using std::variant;
+using std::vector;
 
 #define ESC '\x1b'
 #define CSI "\x1b["
+#define color(in, c) CSI + to_string((int)c) + 'm' + in + CSI "0m"
+typedef tuple<double, double, int> Tddi;
 
 enum class SGR : short
 {
@@ -33,12 +49,103 @@ enum class SGR : short
     brightWhite
 };
 
+class Rect
+{
+public:
+    int top, left, bottom, right;
+    Rect(int top_, int left_, int bottom_, int right_) : top(top_), left(left_), bottom(bottom_), right(right_) {}
+    Rect() : top(0), left(0), bottom(0), right(0) {}
+};
+
+class UnitChar
+{
+public:
+    string c;
+    variant<SGR, int> colorF;
+    variant<SGR, int> colorB;
+    UnitChar()
+    {
+        c = ' ';
+        colorF = SGR::white;
+        colorB = 232;
+    };
+    void setColorF(int c256)
+    {
+        colorF = c256;
+    }
+    void setColorF(SGR x)
+    {
+        colorF = x;
+    }
+    void setColorF(variant<SGR, int> x)
+    {
+        colorF = x;
+    }
+    void setColorB(int c256)
+    {
+        colorB = c256;
+    }
+    void setColorB(SGR x)
+    {
+        colorB = x;
+    }
+    void setColorB(variant<SGR, int> x)
+    {
+        colorB = x;
+    }
+    string toString()
+    {
+        std::stringstream ss;
+
+        if (colorF.index() == 1)
+        {
+            int c256 = std::get<1>(colorF);
+            ss << CSI << "38;5;" << c256 << 'm';
+        }
+        else
+        {
+            ss << CSI << static_cast<int>(std::get<0>(colorF)) << 'm';
+        }
+
+        if (colorB.index() == 1)
+        {
+            int c256 = std::get<1>(colorB);
+            ss << CSI << "48;5;" << c256 << 'm';
+        }
+        else
+        {
+            ss << CSI << static_cast<int>(std::get<0>(colorB)) << 'm';
+        }
+        ss << c;
+        ss << CSI << "0m";
+        return ss.str();
+    }
+    void claer()
+    {
+        c = ' ';
+        colorF = SGR::white;
+        colorB = 232;
+    }
+    void setChar(char c_)
+    {
+        c = c_;
+    }
+};
+
+vector<vector<UnitChar>> convetStringtoUnitChar(string s);
+void decodeColor(string temp, variant<SGR, int> &resultF, variant<SGR, int> &resultB);
+
 class UIObject
 {
 public:
-    int prow, pcol;
-    UIObject(int x_, int y_) : prow(x_), pcol(y_) {}
-    virtual void draw(char **&displayChar, SGR **&displayColor) = 0;
+    Rect rect;
+    int prow;
+    int pcol;
+    UIObject() {}
+    UIObject(Rect r) : rect(r) {}
+    UIObject(int _prow, int _pcol) : prow(_prow), pcol(_pcol) {}
+    void setRect(Rect r);
+    virtual void draw(UnitChar **, int, int) = 0;
 };
 
 class ConsoleUI
@@ -47,168 +154,75 @@ public:
     int height;
     int width;
     vector<UIObject *> uioj;
-    // UIObject* uioj;
-    char **displayChar;
-    SGR **displayColor;
+
+    UnitChar **formatDisplay;
 
     CONSOLE_SCREEN_BUFFER_INFO ScreenBufferInfo;
     HANDLE hout;
 
-    ConsoleUI()
-    {
-        std::ios_base::sync_with_stdio(false);
-        cout<<CSI<<"?25l";
-        // get consloe height and width
-        // hout = GetStdHandle(STD_OUTPUT_HANDLE);
-        // GetConsoleScreenBufferInfo(hout, &ScreenBufferInfo);
-        // width = ScreenBufferInfo.srWindow.Right - ScreenBufferInfo.srWindow.Left + 1;
-        // height = ScreenBufferInfo.srWindow.Bottom - ScreenBufferInfo.srWindow.Top + 1;
-        //
-        cout<<CSI<<"6n";
-        scanf("\033[%d;%dR", &, y);
-        cerr << height << " " << width << endl;
-
-        displayChar = new char *[height];
-        for (int i = 0; i < height; i++)
-        {
-            displayChar[i] = new char[width];
-        }
-        displayColor = new SGR *[height];
-        for (int i = 0; i < height; i++)
-        {
-            displayColor[i] = new SGR[width];
-        }
-
-        for (int i = 0; i < height; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                displayChar[i][j] = ' ';
-                displayColor[i][j] = SGR::brightWhite;
-            }
-        }
-    }
-    ~ConsoleUI()
-    {
-        delete[] displayChar;
-        delete[] displayColor;
-        for (auto i : uioj)
-        {
-            delete i;
-        }
-        // delete uioj;
-    }
-
+    ConsoleUI(int height, int widht);
+    ~ConsoleUI();
+    void SetWindow(int Width, int Height);
     void ClearScreen();
     void draw();
     void display();
 };
 
-void ConsoleUI::display()
-{
-    // SetConsoleCursorPosition(hout, {0, 0});
-    cout<<CSI<<"H";
-    this->draw();
-    for (int i = 0; i < height; i++)
-    {
-
-        for (int j = 0; j < width; j++)
-        {
-            std::cout << ESC << "[" << (int)displayColor[i][j] << "m" << displayChar[i][j] << ESC << "[0m";
-        }
-        if (i != height - 1)
-            std::cout << '\n';
-    }
-    std::cout << std::flush;
-}
-
-void ConsoleUI::ClearScreen()
-{
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    DWORD count;
-    DWORD cellCount;
-    COORD homeCoords = {0, 0};
-
-    /* Get the number of cells in the current buffer */
-    if (!GetConsoleScreenBufferInfo(hout, &csbi))
-        return;
-    cellCount = csbi.dwSize.X * csbi.dwSize.Y;
-
-    /* Fill the entire buffer with spaces */
-    if (!FillConsoleOutputCharacter(
-            hout,
-            (TCHAR)' ',
-            cellCount,
-            homeCoords,
-            &count))
-        return;
-
-    /* Fill the entire buffer with the current colors and attributes */
-    if (!FillConsoleOutputAttribute(
-            hout,
-            csbi.wAttributes,
-            cellCount,
-            homeCoords,
-            &count))
-        return;
-
-    /* Move the cursor home */
-    SetConsoleCursorPosition(hout, homeCoords);
-}
-
-void ConsoleUI::draw()
-{
-
-    for (int i = 0; i < height; i++)
-    {
-        for (int j = 0; j < width; j++)
-        {
-            displayChar[i][j] = ' ';
-            displayColor[i][j] = SGR::brightWhite;
-        }
-    }
-
-    for (auto i : uioj)
-    {
-        // cerr << displayChar << " " << displayColor << endl;
-        // cerr << i << endl;
-        i->draw(displayChar, displayColor);
-    }
-
-    // uioj->draw(displayChar,displayColor);
-}
-
 class TextBox : public UIObject
 {
-
 public:
-    TextBox(int x_, int y_) : UIObject(x_, y_) {}
-    void draw(char **&displayChar, SGR **&displayColor) override;
+    string text;
+    TextBox(int _prow, int _pcol) : UIObject(_prow, _pcol) {}
+    void draw(UnitChar **, int, int) override;
 };
-void TextBox::draw(char **&displayChar, SGR **&displayColor)
+
+class Image : public UIObject
 {
-    // 5*10
+public:
+    Image(int _prow, int _pcol) : UIObject(_prow, _pcol) {}
+    vector<vector<UnitChar>> image;
+    void draw(UnitChar **, int, int) override;
+    void setImage(string path);
+};
 
-    // cerr << this->prow << " " << this->pcol << endl;
+class InputBox : public UIObject
+{
+public:
+    string prompt;
+    string eprompt;
+    InputBox(int height, int width);
+    void draw(UnitChar **, int, int) override;
+    template <class... T>
+    tuple<T...> getInput(function<bool(tuple<T...> &)> check)
+    {
+        tuple<T...> inp;
+        cout << CSI << this->prow + 1 << ";0H";
+        cout << prompt << flush;
+        while (1)
+        {
+            stringstream ssin;
+            string rawInput;
 
-    for (int i = 0; i < 5; i++)
-    {
-        displayChar[this->prow + i][this->pcol] = '|';
+            cout << CSI + to_string((int)SGR::brightYellow) + "m" << flush;
+
+            getline(cin, rawInput);
+            ssin << rawInput;
+            cout << CSI "0m" << flush;
+
+            apply([&ssin](auto &...x)
+                  { (ssin >> ... >> x); },
+                  inp);
+
+            // this_thread::sleep_for(chrono::milliseconds(1));
+
+            if (ssin.rdbuf()->in_avail() != 0 || ssin.fail() || !check(inp))
+            {
+                ssin.clear();
+                cout << CSI "1F" CSI "0J" << eprompt << flush;
+                continue;
+            }
+            break;
+        }
+        return inp;
     }
-    // cerr << "ds1" << endl;
-    for (int i = 0; i < 5; i++)
-    {
-        displayChar[this->prow + i][this->pcol + 9] = '|';
-    }
-    // cerr << "ds2" << endl;
-    for (int i = 0; i < 10; i++)
-    {
-        displayChar[this->prow][this->pcol + i] = '-';
-    }
-    // cerr << "ds3" << endl;
-    for (int i = 0; i < 10; i++)
-    {
-        displayChar[this->prow + 4][this->pcol + i] = '-';
-    }
-    // cerr << "ds4" << endl;
-}
+};
