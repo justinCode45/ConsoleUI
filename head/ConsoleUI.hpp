@@ -1,3 +1,6 @@
+#ifndef CONSOLEUI_HPP
+#define CONSOLEUI_HPP
+
 #include <iostream>
 #include <vector>
 #include <windows.h>
@@ -8,6 +11,9 @@
 #include <string>
 #include <fstream>
 #include <functional>
+
+// #include "UIObject.hpp"
+
 using std::apply;
 using std::cerr;
 using std::cin;
@@ -29,7 +35,7 @@ using std::vector;
 #define color(in, c) CSI + to_string((int)c) + 'm' + in + CSI "0m"
 typedef tuple<double, double, int> Tddi;
 
-enum class SGR : short
+enum class FSGR
 {
     black = 30,
     red,
@@ -49,35 +55,49 @@ enum class SGR : short
     brightWhite
 };
 
-class Rect
+enum class BSGR
 {
-public:
-    int top, left, bottom, right;
-    Rect(int top_, int left_, int bottom_, int right_) : top(top_), left(left_), bottom(bottom_), right(right_) {}
-    Rect() : top(0), left(0), bottom(0), right(0) {}
+    black = 40,
+    red,
+    green,
+    yellow,
+    blue,
+    magenta,
+    cyan,
+    white,
+    brightBlack = 100,
+    brightRed,
+    brightGreen,
+    brightYellow,
+    brightBlue,
+    brightMagenta,
+    brightCyan,
+    brightWhite
 };
+
+
 
 class UnitChar
 {
 public:
     string c;
-    variant<SGR, int> colorF;
-    variant<SGR, int> colorB;
+    variant<FSGR, int> colorF;
+    variant<BSGR, int> colorB;
     UnitChar()
     {
         c = ' ';
-        colorF = SGR::white;
+        colorF = FSGR::white;
         colorB = 232;
     };
     void setColorF(int c256)
     {
         colorF = c256;
     }
-    void setColorF(SGR x)
+    void setColorF(FSGR x)
     {
         colorF = x;
     }
-    void setColorF(variant<SGR, int> x)
+    void setColorF(variant<FSGR, int> x)
     {
         colorF = x;
     }
@@ -85,11 +105,11 @@ public:
     {
         colorB = c256;
     }
-    void setColorB(SGR x)
+    void setColorB(BSGR x)
     {
         colorB = x;
     }
-    void setColorB(variant<SGR, int> x)
+    void setColorB(variant<BSGR, int> x)
     {
         colorB = x;
     }
@@ -123,7 +143,7 @@ public:
     void claer()
     {
         c = ' ';
-        colorF = SGR::white;
+        colorF = FSGR::white;
         colorB = 232;
     }
     void setChar(char c_)
@@ -132,8 +152,15 @@ public:
     }
 };
 
-vector<vector<UnitChar>> convetStringtoUnitChar(string s);
-void decodeColor(string temp, variant<SGR, int> &resultF, variant<SGR, int> &resultB);
+
+class Rect
+{
+public:
+    int top, left, bottom, right;
+    Rect(int top_, int left_, int bottom_, int right_) : top(top_), left(left_), bottom(bottom_), right(right_) {}
+    Rect() : top(0), left(0), bottom(0), right(0) {}
+};
+
 
 class UIObject
 {
@@ -147,6 +174,9 @@ public:
     void setRect(Rect r);
     virtual void draw(UnitChar **, int, int) = 0;
 };
+
+vector<vector<UnitChar>> convetStringtoUnitChar(string s);
+void decodeColor(string temp, variant<FSGR, int> &resultF, variant<BSGR, int> &resultB);
 
 class ConsoleUI
 {
@@ -168,61 +198,9 @@ public:
     void display();
 };
 
-class TextBox : public UIObject
-{
-public:
-    string text;
-    TextBox(int _prow, int _pcol) : UIObject(_prow, _pcol) {}
-    void draw(UnitChar **, int, int) override;
-};
 
-class Image : public UIObject
-{
-public:
-    Image(int _prow, int _pcol) : UIObject(_prow, _pcol) {}
-    vector<vector<UnitChar>> image;
-    void draw(UnitChar **, int, int) override;
-    void setImage(string path);
-};
 
-class InputBox : public UIObject
-{
-public:
-    string prompt;
-    string eprompt;
-    InputBox(int height, int width);
-    void draw(UnitChar **, int, int) override;
-    template <class... T>
-    tuple<T...> getInput(function<bool(tuple<T...> &)> check)
-    {
-        tuple<T...> inp;
-        cout << CSI << this->prow + 1 << ";0H";
-        cout << prompt << flush;
-        while (1)
-        {
-            stringstream ssin;
-            string rawInput;
 
-            cout << CSI + to_string((int)SGR::brightYellow) + "m" << flush;
 
-            getline(cin, rawInput);
-            ssin << rawInput;
-            cout << CSI "0m" << flush;
 
-            apply([&ssin](auto &...x)
-                  { (ssin >> ... >> x); },
-                  inp);
-
-            // this_thread::sleep_for(chrono::milliseconds(1));
-
-            if (ssin.rdbuf()->in_avail() != 0 || ssin.fail() || !check(inp))
-            {
-                ssin.clear();
-                cout << CSI "1F" CSI "0J" << eprompt << flush;
-                continue;
-            }
-            break;
-        }
-        return inp;
-    }
-};
+#endif
