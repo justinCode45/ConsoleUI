@@ -1,13 +1,18 @@
 #include <iostream>
-#include "ConsoleUI.hpp"
 #include <thread>
 #include <random>
 #include <windows.h>
+#include "./head/ConsoleUI.hpp"
+#include "./head/UnitChar.hpp"
+#include "./head/UIobject.hpp"
+#include "./head/Gengral.hpp"
 #define SHEIGHT 50
 #define SWIDTH 150
 #define imgsetZ 3
+
 using namespace std;
 typedef tuple<double, double, int> Tddi;
+
 const double CM_PRE_INCH = 2.54;
 const double KG_PRE_POUND = 0.454;
 
@@ -39,7 +44,7 @@ int main()
                    "jackets, and waist sizes based on the input height and weight.";
     preImage.setImage("./img/bochi.ans");
     preInput.prompt = "Enter the maximum of repetitons (an int): ";
-    preInput.eprompt = "Enter the maximum of repetitons (" color("an int", SGR::brightRed) "): ";
+    preInput.eprompt = "Enter the maximum of repetitons (" + color("an int", FSGR::brightRed) + "): ";
 
     prepareUI.uioj.push_back(&preImage);
     prepareUI.uioj.push_back(&preInput);
@@ -54,8 +59,8 @@ int main()
     TextBox result1(5,2);
     TextBox result2(10,2);
 
-    dataIn.prompt = "Enter " color("height", SGR::brightWhite) " (in cm) and " color("weight", SGR::brightWhite) " (in Kg) and " color("age", SGR::brightWhite) " (3 postive ints) :";
-    dataIn.eprompt = "Enter " color("height", SGR::brightWhite) " (in cm) and " color("weight", SGR::brightWhite) " (in Kg) and " color("age", SGR::brightWhite) " (" color("3 postive ints", SGR::brightRed) ") :";
+    dataIn.prompt = "Enter "+color("height", FSGR::brightWhite)+" (in cm) and "+color("weight", FSGR::brightWhite)+" (in Kg) and "+color("age", FSGR::brightWhite)+" (3 postive ints) :";
+    dataIn.eprompt = "Enter "+color("height", FSGR::brightWhite)+" (in cm) and "+color("weight", FSGR::brightWhite)+" (in Kg) and "+color("age", FSGR::brightWhite)+" ("+color("3 postive ints", FSGR::brightRed)+") :";
     result1.text ="";
     result2.text ="";
     string imgPath[imgsetZ]={
@@ -93,9 +98,9 @@ int main()
                        "Weight: " + to_string(weight) + " Kg\n"
                        "Age   : " + to_string(age) + " years old\n";
 
-        result2.text = "Hat size    : "  color(to_string(hat),SGR::brightCyan)  "\n"
-                       "Jacket size : "  color(to_string(jacket),SGR::brightCyan)  "\n"
-                       "Waist size  : "  color(to_string(waist),SGR::brightCyan)  "\n";
+        result2.text = "Hat size    : " +color(to_string(hat),FSGR::brightCyan) +"\n"
+                       "Jacket size : " +color(to_string(jacket),FSGR::brightCyan) +"\n"
+                       "Waist size  : " +color(to_string(waist),FSGR::brightCyan) +"\n";
 
         mainUI.uioj[0] = imgSet[rand() % imgsetZ];
     }

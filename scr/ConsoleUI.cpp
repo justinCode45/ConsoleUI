@@ -199,4 +199,3 @@ void decodeColor(string temp, variant<FSGR, int> &resultF, variant<BSGR, int> &r
 }
 
 
-

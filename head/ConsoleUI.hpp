@@ -11,148 +11,20 @@
 #include <string>
 #include <fstream>
 #include <functional>
+#include "Gengral.hpp"
+#include "UnitChar.hpp"
 
-// #include "UIObject.hpp"
 
-using std::apply;
-using std::cerr;
-using std::cin;
-using std::cout;
-using std::endl;
-using std::flush;
-using std::fstream;
-using std::function;
-using std::get;
-using std::string;
-using std::stringstream;
-using std::to_string;
-using std::tuple;
-using std::variant;
-using std::vector;
+using namespace std;
 
 #define ESC '\x1b'
-#define CSI "\x1b["
-#define color(in, c) CSI + to_string((int)c) + 'm' + in + CSI "0m"
+
 typedef tuple<double, double, int> Tddi;
 
-enum class FSGR
-{
-    black = 30,
-    red,
-    green,
-    yellow,
-    blue,
-    magenta,
-    cyan,
-    white,
-    brightBlack = 90,
-    brightRed,
-    brightGreen,
-    brightYellow,
-    brightBlue,
-    brightMagenta,
-    brightCyan,
-    brightWhite
-};
 
-enum class BSGR
-{
-    black = 40,
-    red,
-    green,
-    yellow,
-    blue,
-    magenta,
-    cyan,
-    white,
-    brightBlack = 100,
-    brightRed,
-    brightGreen,
-    brightYellow,
-    brightBlue,
-    brightMagenta,
-    brightCyan,
-    brightWhite
-};
+vector<vector<UnitChar>> convetStringtoUnitChar(string s);
 
-
-
-class UnitChar
-{
-public:
-    string c;
-    variant<FSGR, int> colorF;
-    variant<BSGR, int> colorB;
-    UnitChar()
-    {
-        c = ' ';
-        colorF = FSGR::white;
-        colorB = 232;
-    };
-    void setColorF(int c256)
-    {
-        colorF = c256;
-    }
-    void setColorF(FSGR x)
-    {
-        colorF = x;
-    }
-    void setColorF(variant<FSGR, int> x)
-    {
-        colorF = x;
-    }
-    void setColorB(int c256)
-    {
-        colorB = c256;
-    }
-    void setColorB(BSGR x)
-    {
-        colorB = x;
-    }
-    void setColorB(variant<BSGR, int> x)
-    {
-        colorB = x;
-    }
-    string toString()
-    {
-        std::stringstream ss;
-
-        if (colorF.index() == 1)
-        {
-            int c256 = std::get<1>(colorF);
-            ss << CSI << "38;5;" << c256 << 'm';
-        }
-        else
-        {
-            ss << CSI << static_cast<int>(std::get<0>(colorF)) << 'm';
-        }
-
-        if (colorB.index() == 1)
-        {
-            int c256 = std::get<1>(colorB);
-            ss << CSI << "48;5;" << c256 << 'm';
-        }
-        else
-        {
-            ss << CSI << static_cast<int>(std::get<0>(colorB)) << 'm';
-        }
-        ss << c;
-        ss << CSI << "0m";
-        return ss.str();
-    }
-    void claer()
-    {
-        c = ' ';
-        colorF = FSGR::white;
-        colorB = 232;
-    }
-    void setChar(char c_)
-    {
-        c = c_;
-    }
-};
-
-
+void decodeColor(string temp, variant<FSGR, int> &resultF, variant<BSGR, int> &resultB);
 class Rect
 {
 public:
@@ -160,7 +32,6 @@ public:
     Rect(int top_, int left_, int bottom_, int right_) : top(top_), left(left_), bottom(bottom_), right(right_) {}
     Rect() : top(0), left(0), bottom(0), right(0) {}
 };
-
 
 class UIObject
 {
@@ -175,8 +46,6 @@ public:
     virtual void draw(UnitChar **, int, int) = 0;
 };
 
-vector<vector<UnitChar>> convetStringtoUnitChar(string s);
-void decodeColor(string temp, variant<FSGR, int> &resultF, variant<BSGR, int> &resultB);
 
 class ConsoleUI
 {
@@ -197,9 +66,6 @@ public:
     void draw();
     void display();
 };
-
-
-
 
 
 
