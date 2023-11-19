@@ -13,9 +13,11 @@ using namespace std;
 class TextBox : public UIObject
 {
 public:
-    string text;
     TextBox(int _prow, int _pcol) : UIObject(_prow, _pcol) {}
     void draw(UnitChar **, int, int) override;
+    TextBox& operator<<(string s);
+    void clear();
+    string text;
 };
 
 class Image : public UIObject

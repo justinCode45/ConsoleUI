@@ -40,8 +40,9 @@ int main()
     Image preImage(0, 0);
     InputBox preInput(SHEIGHT, SWIDTH);
     TextBox preText(20, 5);
-    preText.text = "The purpose of this program is to suggest hats,               \n"
-                   "jackets, and waist sizes based on the input height and weight.";
+    preText << "The purpose of this program is to suggest hats,               \n"
+            << "jackets, and waist sizes based on the input height and weight.";
+    
     preImage.setImage("./img/bochi.ans");
     preInput.prompt = "Enter the maximum of repetitons (an int): ";
     preInput.eprompt = "Enter the maximum of repetitons (" + color("an int", FSGR::brightRed) + "): ";
@@ -56,20 +57,19 @@ int main()
 
     ConsoleUI mainUI(SHEIGHT, SWIDTH);
     InputBox dataIn(SHEIGHT, SWIDTH);
-    TextBox result1(5,2);
-    TextBox result2(10,2);
+    TextBox result1(5, 2);
+    TextBox result2(10, 2);
 
-    dataIn.prompt = "Enter "+color("height", FSGR::brightWhite)+" (in cm) and "+color("weight", FSGR::brightWhite)+" (in Kg) and "+color("age", FSGR::brightWhite)+" (3 postive ints) :";
-    dataIn.eprompt = "Enter "+color("height", FSGR::brightWhite)+" (in cm) and "+color("weight", FSGR::brightWhite)+" (in Kg) and "+color("age", FSGR::brightWhite)+" ("+color("3 postive ints", FSGR::brightRed)+") :";
-    result1.text ="";
-    result2.text ="";
-    string imgPath[imgsetZ]={
+    dataIn.prompt = "Enter " + color("height", FSGR::brightWhite) + " (in cm) and " + color("weight", FSGR::brightWhite) + " (in Kg) and " + color("age", FSGR::brightWhite) + " (3 postive ints) :";
+    dataIn.eprompt = "Enter " + color("height", FSGR::brightWhite) + " (in cm) and " + color("weight", FSGR::brightWhite) + " (in Kg) and " + color("age", FSGR::brightWhite) + " (" + color("3 postive ints", FSGR::brightRed) + ") :";
+    result1.clear();
+    result2.clear();
+    string imgPath[imgsetZ] = {
         "karyl1",
         "karyl2",
-        "karyl3"
-    };
-    Image* imgSet[imgsetZ];
-    
+        "karyl3"};
+    Image *imgSet[imgsetZ];
+
     for (int i = 0; i < imgsetZ; i++)
     {
         imgSet[i] = new Image(5, 60);
@@ -80,10 +80,11 @@ int main()
     mainUI.uioj.push_back(&result1);
     mainUI.uioj.push_back(&result2);
     mainUI.uioj.push_back(&dataIn);
-
+   
     for (int k = 0; k < maxRepetitions; k++)
     {
         mainUI.display();
+    
         auto [height, weight, age] = dataIn.getInput<double, double, int>(
             (function<bool(Tddi &)>)[](Tddi & in)->bool {
                 return get<0>(in) > 0 && get<1>(in) > 0 && get<2>(in) > 0;
@@ -93,14 +94,16 @@ int main()
         double hat = hatSize(p);
         double jacket = jacketSize(p);
         double waist = waistSize(p);
-        result1.text = "You input:                      \n"
-                       "Height: " + to_string(height) + " cm\n"
-                       "Weight: " + to_string(weight) + " Kg\n"
-                       "Age   : " + to_string(age) + " years old\n";
+        result1.clear();
+        result2.clear();
+        result1 << "You input:                      \n"
+                << "Height: " + to_string(height) + " cm\n"
+                << "Weight: " + to_string(weight) + " Kg\n"
+                << "Age   : " + to_string(age) + " years old\n";
 
-        result2.text = "Hat size    : " +color(to_string(hat),FSGR::brightCyan) +"\n"
-                       "Jacket size : " +color(to_string(jacket),FSGR::brightCyan) +"\n"
-                       "Waist size  : " +color(to_string(waist),FSGR::brightCyan) +"\n";
+        result2 << "Hat size    : " + color(to_string(hat), FSGR::brightCyan) + "\n"
+                << "Jacket size : " + color(to_string(jacket), FSGR::brightCyan) + "\n"
+                << "Waist size  : " + color(to_string(waist), FSGR::brightCyan) + "\n";
 
         mainUI.uioj[0] = imgSet[rand() % imgsetZ];
     }

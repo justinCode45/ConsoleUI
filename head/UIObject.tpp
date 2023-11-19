@@ -1,12 +1,4 @@
-#include "UIObject.hpp"
-#include <tuple>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <iostream>
-#include <functional>
-
-// using namespace std; 
+#include "UIObject.hpp" 
 
 template <class... T>
 tuple<T...> InputBox::getInput(function<bool(tuple<T...> &)> check)
@@ -28,8 +20,6 @@ tuple<T...> InputBox::getInput(function<bool(tuple<T...> &)> check)
         apply([&ssin](auto &...x)
               { (ssin >> ... >> x); },
               inp);
-
-        // this_thread::sleep_for(chrono::milliseconds(1));
 
         if (ssin.rdbuf()->in_avail() != 0 || ssin.fail() || !check(inp))
         {

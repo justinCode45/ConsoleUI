@@ -2,8 +2,6 @@
 #include "../head/ConsoleUI.hpp"
 
 
-
-
 void TextBox::draw(UnitChar **formatdisplay, int height, int width)
 {
     auto formatText = convetStringtoUnitChar(text);
@@ -15,6 +13,17 @@ void TextBox::draw(UnitChar **formatdisplay, int height, int width)
                 formatdisplay[this->prow + i][this->pcol + j] = formatText[i][j];
         }
     }
+}
+
+TextBox &TextBox::operator<<(string s)
+{
+    this->text += s;
+    return *this;
+}
+
+void TextBox::clear()
+{
+    this->text.clear();
 }
 
 void Image::draw(UnitChar **formatdisplay, int height, int width)
@@ -46,13 +55,6 @@ void Image::setImage(string path)
         s += tmp + '\n';
     }
     this->image = convetStringtoUnitChar(s);
-    // for (int i = 0; i < this->image.size(); i++)
-    // {
-    //     for (int j = 0; j < this->image[i].size(); j++)
-    //     {
-    //         this->image[i][j].c =(  "\x1b(0" + this->image[i][j].c + "\x1b(B" );
-    //     }
-    // }
     this->setRect(Rect(this->prow, this->pcol, this->image.size(), this->image[0].size()));
 }
 
@@ -63,7 +65,6 @@ InputBox::InputBox(int height, int width)
 
 void InputBox::draw(UnitChar **formatdisplay, int height, int width)
 {
-
     for (int i = this->prow; i < height; i++)
     {
         for (int j = 0; j < width; j++)
@@ -71,5 +72,4 @@ void InputBox::draw(UnitChar **formatdisplay, int height, int width)
             formatdisplay[i][j].claer();
         }
     }
-
 }

@@ -40,7 +40,7 @@ public:
     int prow;
     int pcol;
     UIObject() {}
-    UIObject(Rect r) : rect(r) {}
+    // UIObject(Rect r) : rect(r) {}
     UIObject(int _prow, int _pcol) : prow(_prow), pcol(_pcol) {}
     void setRect(Rect r);
     virtual void draw(UnitChar **, int, int) = 0;
